@@ -1,47 +1,76 @@
-# React-Boilerplate
-This is a react-boilerplate created for personal learning
+# react-rqrr-wasm
 
-It includes some dummy components to help you get started and understand the boilerplate structure.
+This is a repo to show an example of how to use [`rqrr-wasm`](https://github.com/jackyef/rqrr-wasm) in your webpack project.
 
-Currently the bundles size are as follow:
-- vendors.js (94.95 KB gzipped)
-- client.js (2.59 KB gzipped)
-- other chunks from code splitting (<1 KB gzipped) (this will increase as your components get more complex)
+## Steps
+1. Overrides webpack default wasm loader (inside client.config.js)
+```javascript
+// overrides webpack defaultRules, so that webpack doesn't automatically use its own wasm-loader for wasm file.
+// we want to use file-loader instead.
+defaultRules: [
+  {
+    type: "javascript/auto",
+    resolve: {}
+  },
+  {
+    test: /\.json$/i,
+    type: "json"
+  },
+],
+```
 
-## What it includes
-- [x] Jest
-  > Task runner for doing tests
-- [x] Enzyme
-  > Library to test react component
-- [x] React-emotion
-  > Easy CSS in JS solution, no more worrying about DOM elements being loaded before CSS
-- [x] webpack-dev-server + react-hot-loader
-  > Development server with hot reload capabilities
-- [x] eslint rules and prettier rules
-  > Highly opinionated rules (from work experiences and my personal preferences)
-- [x] React router (v4)
-  > The defacto routing solution for react app
-- [x] component based code splitting 
-  > Load js for components only when they are needed, reduce main bundle size
-- [x] Some webpack bundle optimizations 
+2. Use file-loader to load the `.wasm` file, because we only need the url to pass to `wasm_bindgen()` call. (inside client.config.js)
+```javascript
+test: /\.(png|jpe?g|gif|svg|wasm)$/, 
+```
 
-## What's next
-- [x] Use koa instead of express
-- [x] Enable source map for dev
-- [ ] Setup import resolvers
-- [ ] Change Enzyme to react-testing-library
-- [x] Remove redux, replace it with a GlobalContext with hooks!
-- [x] Change webpack-serve to webpack-dev-server
-- [ ] Upgrade to react-emotion@10
-- [ ] SSR capability (renderer service)
-- [ ] Containerize using docker for easy installation
+3. Import `./src/client/wasm/index.js` file. (example in ./src/client/routes/Home/View.js)
+```javascript
+import wasmModule from '../../wasm';
 
-## Commands
-| Commands            | Purpose                                                        |
-|---------------------|----------------------------------------------------------------|
-| yarn                | install dependencies                                           |
-| yarn stats          | run webpack-bundle-analyzer                                    |
-| yarn build:client   | to build optimized bundle                                      |
-| yarn build:server   | to build optimized server bundle                               |
-| yarn dev:server     | to start development server for the server renderer            |
-| yarn dev:client     | run webpack-dev-server with hot reload enabled for development | 
+// ...usage with react
+const [wasm, setWasm] = useState({
+  loading: false,
+  decode: null,
+});
+
+const loadWasm = () => {
+  setWasm({
+    loading: true,
+  });
+
+  // wasmModule.init() returns a promise. If it's resolved successfully, we can now call wasmModule.decode
+  wasmModule.init().then(() => {
+    setWasm({
+      decode: wasmModule.decode,
+      loading: false,
+    });
+  });
+};
+
+// a facade to prepare an Uint8Array before passing it to wasmModule.decode() call
+const decodeFrame = () => {
+  const canvas = document.createElement('canvas');
+  const scale = 0.25;
+  const video = videoRef.current;
+
+  canvas.width = video.videoWidth * scale;
+  canvas.height = video.videoHeight * scale;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(blob => {
+    const reader = new FileReader();
+
+    reader.addEventListener('loadend', () => {
+      const arrayBuffer = reader.result;
+
+      window.ab = arrayBuffer;
+
+      const output = wasm.decode(new Uint8Array(arrayBuffer));
+
+      console.log(output);
+    });
+    reader.readAsArrayBuffer(blob);
+  });
+};
+
+```
