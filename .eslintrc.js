@@ -103,5 +103,6 @@ module.exports = {
     __CLIENT__: true,
     __PROD__: true,
     __DEV__: true,
+    wasm_bindgen: true,
   },
 };
