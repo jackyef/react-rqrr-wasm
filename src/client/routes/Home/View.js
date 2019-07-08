@@ -1,5 +1,5 @@
+import wasmModule from 'rqrr-wasm';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import wasmModule from '../../wasm';
 
 import { HomeContainer } from './styles';
 

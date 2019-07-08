@@ -5,6 +5,7 @@ import path from 'path';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
+import RqrrWasmPlugin from 'rqrr-wasm/dist/webpack-plugins';
 
 import { ifDev, isProd } from './build-utils';
 import { module as sharedModule, plugins as sharedPlugins } from './shared.config';
@@ -22,27 +23,6 @@ export default {
     ...sharedModule,
     rules: [
       ...sharedModule.rules,
-      // this rule is required so that webpack use file-loader for wasm file, 
-      // and not use its own rules
-      // (https://github.com/webpack/webpack/issues/6725#issuecomment-391237775)
-      {
-        test: /\.(wasm)$/,
-        type: 'javascript/auto',
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name (_file) {
-                if (process.env.NODE_ENV === 'development') {
-                  return '[path][name].[ext]';
-                } else {
-                  return '[hash].[ext]';
-                }
-              }
-            },
-          }
-        ]
-      },
       {
         test: /\.(png|jpe?g|gif|svg)$/, 
         use: [
@@ -67,6 +47,7 @@ export default {
     new CompressionPlugin(),
     new HtmlWebpackPlugin({ template: 'src/client/index.html' }),
     new webpack.HashedModuleIdsPlugin(),
+    new RqrrWasmPlugin(),
   ],
   optimization: {
     nodeEnv: ifDev('development', 'production'),

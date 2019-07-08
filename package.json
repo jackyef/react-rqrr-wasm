@@ -83,7 +83,8 @@
     "react-emotion": "^9.2.3",
     "react-loadable": "^5.4.0",
     "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1"
+    "react-router-dom": "^4.3.1",
+    "rqrr-wasm": "0.0.8"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
