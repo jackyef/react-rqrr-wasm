@@ -19,23 +19,32 @@ export default {
     path: path.resolve(__dirname, '../dist/client'),
   },
   module: {
-    // overrides webpack defaultRules, so that webpack doesn't automatically use its own wasm-loader for wasm file.
-    // we want to use file-loader instead.
-    defaultRules: [
-      {
-        type: "javascript/auto",
-        resolve: {}
-      },
-      {
-        test: /\.json$/i,
-        type: "json"
-      },
-    ],
     ...sharedModule,
     rules: [
       ...sharedModule.rules,
+      // this rule is required so that webpack use file-loader for wasm file, 
+      // and not use its own rules
+      // (https://github.com/webpack/webpack/issues/6725#issuecomment-391237775)
       {
-        test: /\.(png|jpe?g|gif|svg|wasm)$/, 
+        test: /\.(wasm)$/,
+        type: 'javascript/auto',
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name (_file) {
+                if (process.env.NODE_ENV === 'development') {
+                  return '[path][name].[ext]';
+                } else {
+                  return '[hash].[ext]';
+                }
+              }
+            },
+          }
+        ]
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/, 
         use: [
           {
             loader: 'file-loader',

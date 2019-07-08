@@ -17,6 +17,8 @@ webpackClientConfig.devServer = {
   hot: true,
   logLevel: 'silent',
   port,
+  public: host,
+  compress: true,
   publicPath: webpackClientConfig.output.publicPath,
   overlay: {
     warnings: false,
