@@ -1,6 +1,5 @@
 import React from 'react';
 import { object } from 'prop-types';
-import { Route, Switch } from 'react-router';
 import { Router } from 'react-router-dom';
 
 import { HomeView } from './Home';
@@ -8,9 +7,7 @@ import { HomeView } from './Home';
 const RouterProvider = ({ history }) => {
   return (
     <Router history={history}>
-      <Switch>
-        <Route exact path="/" component={HomeView} />
-      </Switch>
+      <HomeView/>
     </Router>
   );
 };
