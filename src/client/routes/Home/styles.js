@@ -31,6 +31,12 @@ injectGlobal`
   button:click {
     border: inset 1px black;
   }
+
+  .output {
+    margin: 8px 0;
+    padding: 8px;
+    background: #eaeaea;
+  }
 `;
 export const HomeContainer = styled.div`
   display: flex;

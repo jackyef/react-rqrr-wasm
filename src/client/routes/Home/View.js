@@ -5,6 +5,7 @@ import { HomeContainer } from './styles';
 
 const Home = () => {
   const videoRef = useRef();
+  const [output, setOutput] = useState('');
   const [wasm, setWasm] = useState({
     loading: false,
     decode: null,
@@ -46,6 +47,7 @@ const Home = () => {
 
         const output = wasm.decode(new Uint8Array(arrayBuffer));
 
+        setOutput(output);
         console.log(output);
       });
       reader.readAsArrayBuffer(blob);
@@ -61,6 +63,10 @@ const Home = () => {
         <button type="button" onClick={wasmLoaded ? decodeFrame : loadWasm} disabled={wasm.loading}>
           {wasm.loading ? 'loading wasm file...' : wasm.decode ? 'Decode current frame!' : 'Load wasm file'}
         </button>
+        <div className="output">
+          Output from the QR decoder: <br /><br/>
+          "{output}"
+        </div>
       </div>
     </HomeContainer>
   );
